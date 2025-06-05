@@ -1,8 +1,8 @@
-fastapi[standard]==0.113.0
-pydantic==2.8.0
+fastapi[standard]
+pydantic
 sqlalchemy
 pydantic-settings
-passlib[bcrypt]==1.7.4
+passlib[bcrypt]
 python-multipart
 python-dotenv
 pyjwt

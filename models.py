@@ -1,17 +1,27 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Enum
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    DateTime,
+    Enum,
+    Numeric,
+    select,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from database import Base
-from enum import Enum
+from enum import Enum as PyEnum
 
 
-class UserRole(str, Enum):
+class UserRole(str, PyEnum):
     BUYER = "Покупатель"
     MANAGER = "Менеджер"
     ADMIN = "Администратор"
 
 
-class OrderStatus(str, Enum):
+class OrderStatus(str, PyEnum):
     PENDING = "В обработке"
     PROCESSING = "В доставке"
     SHIPPED = "Доставлен"
@@ -19,7 +29,7 @@ class OrderStatus(str, Enum):
     CANCELLED = "Отменен"
 
 
-class ReviewStatus(str, Enum):
+class ReviewStatus(str, PyEnum):
     PENDING = "В обработке"
     APPROVED = "Одобрен"
     REJECTED = "Отклонен"
@@ -64,11 +74,11 @@ class Product(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
-    price = Column(Float, nullable=False)
+    price = Column(Numeric(12, 2), nullable=False)
     category_id = Column(
         Integer, ForeignKey("categories.id", ondelete="CASCADE"), nullable=False
     )
-    description = Column(String, nullable=False)
+    description = Column(String)
     stock = Column(Integer)
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -83,6 +93,25 @@ class Product(Base):
         "Review", back_populates="product", cascade="all, delete-orphan"
     )
 
+    @hybrid_property
+    def rating(self):
+        approved_reviews = [
+            r for r in self.reviews if r.status == ReviewStatus.APPROVED
+        ]
+        if not approved_reviews:
+            return 0.0
+        return sum(review.rating for review in approved_reviews) / len(approved_reviews)
+
+    @rating.expression
+    def rating(cls):
+        return (
+            select([func.avg(Review.rating)])
+            .where(Review.product_id == cls.id)
+            .where(Review.status == ReviewStatus.APPROVED)
+            .scalar_subquery()
+            .label("avg_rating")
+        )
+
 
 class Order(Base):
     __tablename__ = "orders"
@@ -92,7 +121,7 @@ class Order(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     status = Column(Enum(OrderStatus), default=OrderStatus.PENDING, nullable=False)
-    amount = Column(Float, nullable=False)
+    amount = Column(Numeric(12, 2), nullable=False)
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -114,7 +143,7 @@ class OrderItem(Base):
         Integer, ForeignKey("products.id", ondelete="CASCADE"), primary_key=True
     )
     quantity = Column(Integer, default=1, nullable=False)
-    price_at_order = Column(Float, nullable=False)
+    price_at_order = Column(Numeric(12, 2), nullable=False)
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product", back_populates="order_items")
