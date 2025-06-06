@@ -2,9 +2,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    db_name: str
     secret_key: str
     salt: str
+    db_name: str
+    token_expire_minutes: int
 
     class Config:
         env_file = ".env"
