@@ -93,6 +93,10 @@ class Product(Base):
         "Review", back_populates="product", cascade="all, delete-orphan"
     )
 
+    @property
+    def category_name(self):
+        return self.category.name if self.category else None
+
     @hybrid_property
     def rating(self):
         approved_reviews = [
@@ -105,11 +109,10 @@ class Product(Base):
     @rating.expression
     def rating(cls):
         return (
-            select([func.avg(Review.rating)])
+            select(func.avg(Review.rating))
             .where(Review.product_id == cls.id)
             .where(Review.status == ReviewStatus.APPROVED)
             .scalar_subquery()
-            .label("avg_rating")
         )
 
 
@@ -147,6 +150,10 @@ class OrderItem(Base):
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product", back_populates="order_items")
+
+    @property
+    def product_name(self):
+        return self.product.name if self.product else None
 
 
 class Review(Base):

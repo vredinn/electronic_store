@@ -10,11 +10,11 @@ TOKEN_EXPIRE_MINUTES = settings.token_expire_minutes
 
 
 from config import settings
-from models import User
+from models import User, UserRole
 from database import get_db
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
 
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -82,7 +82,7 @@ async def get_current_user(
 
 
 async def check_admin_role(current_user: User = Depends(get_current_user)):
-    if current_user.role != "admin":
+    if current_user.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Не достаточно прав",
@@ -91,7 +91,7 @@ async def check_admin_role(current_user: User = Depends(get_current_user)):
 
 
 async def check_manager_role(current_user: User = Depends(get_current_user)):
-    if current_user.role not in ["manager", "admin"]:
+    if current_user.role not in [UserRole.MANAGER, UserRole.ADMIN]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Не достаточно прав",

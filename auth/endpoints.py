@@ -4,12 +4,11 @@ from sqlalchemy.orm import Session
 from database import get_db
 from security import verify_password, create_access_token
 from models import User
-from config import settings
 
 router = APIRouter(tags=["Auth"])
 
 
-@router.post("/login")
+@router.post("/login", description="Вход в систему для получения токена")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
