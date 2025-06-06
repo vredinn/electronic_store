@@ -11,13 +11,13 @@
 - JWT-аутентификация и разграничение прав
 
 ## Используемые технологии
-- Python
-- FastAPI
-- SQLAlchemy
-- Pydantic
+- Python 3.11+
+- FastAPI 0.113.0
+- SQLAlchemy 2.0.41
+- Pydantic 2.8.0
 - SQLite (по умолчанию)
-- JWT (pyjwt)
-- Passlib (bcrypt)
+- JWT (pyjwt) 2.10.1
+- Passlib (bcrypt 4.0.1) 1.7.4
 
 ## Инструкция по запуску
 1. Клонируйте репозиторий:
