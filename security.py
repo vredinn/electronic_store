@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -14,7 +15,7 @@ from models import User, UserRole
 from database import get_db
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login", auto_error=False)
 
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -44,13 +45,13 @@ def decode_token(token: str):
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Токен просрочен",
+            detail="Expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
     except jwt.InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Токен недействителен",
+            detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -60,7 +61,7 @@ async def get_current_user(
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Пользователь не найден",
+        detail="User not found",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -71,7 +72,7 @@ async def get_current_user(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Ошибка при проверке токена: {str(e)}",
+            detail=f"Token error: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -81,11 +82,22 @@ async def get_current_user(
     return user
 
 
+async def get_optional_current_user(
+    token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_db)
+) -> Optional[User]:
+    if not token:
+        return None
+    try:
+        return await get_current_user(token, db)
+    except Exception:
+        return None
+
+
 async def check_admin_role(current_user: User = Depends(get_current_user)):
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Не достаточно прав",
+            detail="Not enough permissions",
         )
     return current_user
 
@@ -94,6 +106,6 @@ async def check_manager_role(current_user: User = Depends(get_current_user)):
     if current_user.role not in [UserRole.MANAGER, UserRole.ADMIN]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Не достаточно прав",
+            detail="Not enough permissions",
         )
     return current_user

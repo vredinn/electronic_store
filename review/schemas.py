@@ -16,13 +16,14 @@ class ReviewCreate(ReviewBase):
 class ReviewUpdate(BaseModel):
     rating: Optional[int] = Field(None, ge=1, le=5)
     text: Optional[str] = Field(None, min_length=10, max_length=1000)
-    status: Optional[ReviewStatus] = Field(default=ReviewStatus.PENDING)
 
 
 class Review(ReviewBase):
     id: int
     product_id: int
+    product_name: str
     user_id: int
+    user_name: str
     status: ReviewStatus
     created_at: datetime
     updated_at: Optional[datetime]

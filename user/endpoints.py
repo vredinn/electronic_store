@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
@@ -28,7 +28,11 @@ def read_users_me(current_user: User = Depends(get_current_user)):
     dependencies=[Depends(check_admin_role)],
     description="Получить список пользователей (только для администратора)",
 )
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_users(
+    skip: int = Query(0, description="Смещение результатов"),
+    limit: int = Query(100, description="Максимальное количество результатов"),
+    db: Session = Depends(get_db),
+):
     return crud.get_users(db, skip=skip, limit=limit)
 
 

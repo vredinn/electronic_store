@@ -7,11 +7,11 @@ app = FastAPI(title="API Магазина электроники", version="1.0.
 api_router = APIRouter(prefix="/api")
 
 api_router.include_router(auth.router)
-api_router.include_router(category.router)
 api_router.include_router(product.router)
+api_router.include_router(category.router)
+api_router.include_router(order.router)
 api_router.include_router(review.router)
 api_router.include_router(user.router)
-api_router.include_router(order.router)
 
 app.include_router(api_router)
 

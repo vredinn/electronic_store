@@ -46,7 +46,7 @@ async def read_products(
     if min_price is not None and max_price is not None and min_price > max_price:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Минимальная цена не может быть больше максимальной",
+            detail="The minimum price cannot be higher than the maximum",
         )
     return crud.get_products(
         db,
@@ -81,7 +81,7 @@ def read_product(product_id: int, db: Session = Depends(get_db)):
     db_product = crud.get_product(db, product_id=product_id)
     if db_product is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Товар не найден"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
         )
     return db_product
 
@@ -98,7 +98,7 @@ def update_product(
     db_product = crud.update_product(db, product_id=product_id, product_update=product)
     if db_product is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Товар не найден"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
         )
     return db_product
 
@@ -112,7 +112,7 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
     db_product = crud.delete_product(db, product_id=product_id)
     if db_product is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Товар не найден"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
         )
     return HTMLResponse(
         status_code=status.HTTP_200_OK, detail="Product deleted successfully"

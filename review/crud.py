@@ -44,6 +44,16 @@ def update_review(db: Session, review_id: int, review_update: schemas.ReviewUpda
         update_data = review_update.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(db_review, key, value)
+        db_review.status = models.ReviewStatus.PENDING
+        db.commit()
+        db.refresh(db_review)
+    return db_review
+
+
+def update_review_status(db: Session, review_id: int, status: str):
+    db_review = db.query(models.Review).filter(models.Review.id == review_id).first()
+    if db_review:
+        db_review.status = status
         db.commit()
         db.refresh(db_review)
     return db_review

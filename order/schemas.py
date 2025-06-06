@@ -27,6 +27,7 @@ class OrderUpdate(BaseModel):
 class Order(OrderBase):
     id: int
     user_id: int
+    user_name: str
     amount: Decimal
     created_at: datetime
     updated_at: Optional[datetime]

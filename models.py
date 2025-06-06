@@ -135,6 +135,10 @@ class Order(Base):
         "OrderItem", back_populates="order", cascade="all, delete-orphan"
     )
 
+    @property
+    def user_name(self):
+        return self.user.username if self.user else None
+
 
 class OrderItem(Base):
     __tablename__ = "order_items"
@@ -172,3 +176,11 @@ class Review(Base):
 
     product = relationship("Product", back_populates="reviews")
     user = relationship("User", back_populates="reviews")
+
+    @property
+    def user_name(self):
+        return self.user.username if self.user else None
+
+    @property
+    def product_name(self):
+        return self.product.name if self.product else None
