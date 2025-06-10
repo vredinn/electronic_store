@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
+from product import Product
 
 
 class CategoryBase(BaseModel):
@@ -29,3 +30,7 @@ class Category(CategoryBase):
 
     class Config:
         from_attributes = True
+
+
+class CategoryWithProducts(Category):
+    products: Optional[list[Product]]

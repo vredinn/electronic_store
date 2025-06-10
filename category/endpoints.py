@@ -29,7 +29,7 @@ def create_category(category: schemas.CategoryCreate, db: Session = Depends(get_
 
 @router.get(
     "/{category_id}",
-    response_model=schemas.Category,
+    response_model=schemas.CategoryWithProducts,
     description="Получить информацию о категории",
 )
 def read_category(category_id: int, db: Session = Depends(get_db)):
