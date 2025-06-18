@@ -7,13 +7,16 @@ from models import OrderStatus
 
 class OrderItemBase(BaseModel):
     product_id: int
-    product_name: str
     quantity: int = Field(..., gt=0)
+
+
+class OrderItem(OrderItemBase):
+    product_name: str
     price_at_order: Decimal = Field(..., gt=0, decimal_places=2)
 
 
 class OrderBase(BaseModel):
-    status: OrderStatus = Field(default=OrderStatus.PENDING)
+    pass
 
 
 class OrderCreate(OrderBase):
@@ -26,12 +29,13 @@ class OrderUpdate(BaseModel):
 
 class Order(OrderBase):
     id: int
+    status: OrderStatus = Field(default=OrderStatus.PENDING)
     user_id: int
     user_name: str
     amount: Decimal
     created_at: datetime
     updated_at: Optional[datetime]
-    items: List[OrderItemBase]
+    items: List[OrderItem]
 
     class Config:
         from_attributes = True
